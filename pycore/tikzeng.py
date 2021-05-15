@@ -2,7 +2,7 @@
 import os
 
 def to_head( projectpath ):
-    pathlayers = os.path.join( projectpath, 'layers/' )
+    pathlayers = os.path.join( projectpath, 'layers/' ).replace('\\', '/')
     return r"""
 \documentclass[border=8pt, multi, tikz]{standalone} 
 \usepackage{import}
@@ -20,6 +20,7 @@ def to_cor():
 \def\FcColor{rgb:blue,5;red,2.5;white,5}
 \def\FcReluColor{rgb:blue,5;red,5;white,4}
 \def\SoftmaxColor{rgb:magenta,5;black,7}   
+\def\SumColor{rgb:blue,5;green,15}
 """
 
 def to_begin():
@@ -34,9 +35,9 @@ def to_begin():
 
 # layers definition
 
-def to_input( pathfile, to='(-3,0,0)', width=8, height=8 ):
+def to_input( pathfile, to='(-3,0,0)', width=8, height=8, name="temp" ):
     return r"""
-\node[canvas is zy plane at x=0] (temp) at """+ to +""" {\includegraphics[width="""+ str(width)+"cm"+""",height="""+ str(height)+"cm"+"""]{"""+ pathfile +"""}};
+\node[canvas is zy plane at x=0] (""" + name + """) at """+ to +""" {\includegraphics[width="""+ str(width)+"cm"+""",height="""+ str(height)+"cm"+"""]{"""+ pathfile +"""}};
 """
 
 # Conv
@@ -164,6 +165,19 @@ def to_SoftMax( name, s_filer=10, offset="(0,0,0)", to="(0,0,0)", width=1.5, hei
     };
 """
 
+def to_Sum( name, offset="(0,0,0)", to="(0,0,0)", radius=2.5, opacity=0.6):
+    return r"""
+\pic[shift={"""+ offset +"""}] at """+ to +""" 
+    {Ball={
+        name=""" + name +""",
+        fill=\SumColor,
+        opacity="""+ str(opacity) +""",
+        radius="""+ str(radius) +""",
+        logo=$+$
+        }
+    };
+"""
+
 
 def to_connection( of, to):
     return r"""
@@ -173,7 +187,7 @@ def to_connection( of, to):
 def to_skip( of, to, pos=1.25):
     return r"""
 \path ("""+ of +"""-southeast) -- ("""+ of +"""-northeast) coordinate[pos="""+ str(pos) +"""] ("""+ of +"""-top) ;
-\path ("""+ to +"""-south)  -- ("""+ to +"""-north)  coordinate[pos=1.25] ("""+ to +"""-top) ;
+\path ("""+ to +"""-south)  -- ("""+ to +"""-north)  coordinate[pos="""+ str(pos) +"""] ("""+ to +"""-top) ;
 \draw [copyconnection]  ("""+of+"""-northeast)  
 -- node {\copymidarrow}("""+of+"""-top)
 -- node {\copymidarrow}("""+to+"""-top)
